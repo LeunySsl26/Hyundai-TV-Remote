@@ -886,8 +886,6 @@
       'btn-home': 'HOME',
       'btn-menu': 'MENU',
       'btn-exit': 'EXIT',
-      'btn-vol-up': 'VOL_UP',
-      'btn-vol-down': 'VOL_DOWN',
       'btn-mute': 'MUTE',
       'btn-ch-up': 'CH_UP',
       'btn-ch-down': 'CH_DOWN',
@@ -903,6 +901,38 @@
         el.addEventListener('click', () => sendCommand(cmd));
       }
     }
+
+    // Continuous hold for Volume Up / Down
+    function setupHoldCommand(id, cmd) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let holdTimeout = null;
+      let holdInterval = null;
+
+      const startHold = (e) => {
+        if (e.cancelable) e.preventDefault();
+        stopHold();
+        sendCommand(cmd);
+        holdTimeout = setTimeout(() => {
+          holdInterval = setInterval(() => sendCommand(cmd), 160);
+        }, 350);
+      };
+
+      const stopHold = () => {
+        if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
+        if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+      };
+
+      el.addEventListener('touchstart', startHold, { passive: false });
+      el.addEventListener('touchend', stopHold);
+      el.addEventListener('touchcancel', stopHold);
+      el.addEventListener('mousedown', startHold);
+      el.addEventListener('mouseup', stopHold);
+      el.addEventListener('mouseleave', stopHold);
+    }
+
+    setupHoldCommand('btn-vol-up', 'VOL_UP');
+    setupHoldCommand('btn-vol-down', 'VOL_DOWN');
 
     // Keyboard bar listeners
     const kbdInput = document.getElementById('kbd-text');

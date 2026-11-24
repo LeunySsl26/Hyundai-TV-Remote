@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -220,11 +221,25 @@ public class MainActivity extends Activity implements WebOsController.Listener, 
         setCommand(R.id.btn_input, IrTransmitter.CMD_INPUT, () -> webOsController.switchInput("com.webos.app.hdmi3"));
 
         // VOLUME & CHANNEL
-        setCommand(R.id.btn_vol_up, IrTransmitter.CMD_VOL_UP, () -> webOsController.volumeUp());
-        setCommand(R.id.btn_vol_down, IrTransmitter.CMD_VOL_DOWN, () -> webOsController.volumeDown());
+        setContinuousCommand(R.id.btn_vol_up, IrTransmitter.CMD_VOL_UP, () -> webOsController.volumeUp());
+        setContinuousCommand(R.id.btn_vol_down, IrTransmitter.CMD_VOL_DOWN, () -> webOsController.volumeDown());
         setCommand(R.id.btn_mute, IrTransmitter.CMD_MUTE, () -> webOsController.setMute(!isMuted));
         setCommand(R.id.btn_ch_up, IrTransmitter.CMD_CH_UP, () -> webOsController.channelUp());
         setCommand(R.id.btn_ch_down, IrTransmitter.CMD_CH_DOWN, () -> webOsController.channelDown());
+
+        // QUICK ACCESS: NETFLIX, YOUTUBE, HDMI 3
+        findViewById(R.id.btn_quick_netflix).setOnClickListener(v -> {
+            onLaunchApp("netflix");
+            Toast.makeText(this, "Abriendo Netflix...", Toast.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.btn_quick_youtube).setOnClickListener(v -> {
+            onLaunchApp("youtube.leanback.v4");
+            Toast.makeText(this, "Abriendo YouTube...", Toast.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.btn_quick_hdmi3).setOnClickListener(v -> {
+            onSwitchInput("com.webos.app.hdmi3");
+            Toast.makeText(this, "Cambiando a HDMI 3...", Toast.LENGTH_SHORT).show();
+        });
 
         // MEDIA
         setCommand(R.id.btn_play, IrTransmitter.CMD_PLAY, () -> webOsController.play());
@@ -267,24 +282,59 @@ public class MainActivity extends Activity implements WebOsController.Listener, 
         }
 
         // SETTINGS / PROFILE DIALOG
-        findViewById(R.id.btn_settings).setOnClickListener(v -> showSettingsDialog());
+        findViewById(R.id.btn_settings).setOnClickListener(v -> {
+            haptic();
+            showSettingsDialog();
+        });
+    }
+
+    private void executeRemoteCommand(int irCommand, Runnable wifiAction) {
+        haptic();
+        if (isIrMode) {
+            boolean ok = irTransmitter.transmitCommand(irCommand);
+            if (!ok && !irTransmitter.hasIrEmitter()) {
+                Toast.makeText(this, "Emisor IR no disponible", Toast.LENGTH_SHORT).show();
+            }
+        } else if (wifiAction != null) {
+            wifiAction.run();
+        }
     }
 
     private void setCommand(int resId, int irCommand, Runnable wifiAction) {
         View v = findViewById(resId);
         if (v != null) {
-            v.setOnClickListener(view -> {
-                haptic();
-                if (isIrMode) {
-                    boolean ok = irTransmitter.transmitCommand(irCommand);
-                    if (!ok && !irTransmitter.hasIrEmitter()) {
-                        Toast.makeText(this, "Emisor IR no disponible", Toast.LENGTH_SHORT).show();
-                    }
-                } else if (wifiAction != null) {
-                    wifiAction.run();
-                }
-            });
+            v.setOnClickListener(view -> executeRemoteCommand(irCommand, wifiAction));
         }
+    }
+
+    private void setContinuousCommand(int resId, int irCommand, Runnable wifiAction) {
+        View v = findViewById(resId);
+        if (v == null) return;
+
+        final Runnable repeatRunnable = new Runnable() {
+            @Override
+            public void run() {
+                executeRemoteCommand(irCommand, wifiAction);
+                handler.postDelayed(this, 140);
+            }
+        };
+
+        v.setOnTouchListener((view, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    view.setPressed(true);
+                    handler.removeCallbacks(repeatRunnable);
+                    executeRemoteCommand(irCommand, wifiAction);
+                    handler.postDelayed(repeatRunnable, 350);
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    view.setPressed(false);
+                    handler.removeCallbacks(repeatRunnable);
+                    return true;
+            }
+            return false;
+        });
     }
 
     private void haptic() {
