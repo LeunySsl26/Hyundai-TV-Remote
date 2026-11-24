@@ -1,0 +1,20 @@
+# Build artifacts
+HyundaiRemoteApp/bin/
+HyundaiRemoteApp/obj/
+HyundaiRemoteApp/gen/
+HyundaiRemoteApp/compiled_res/
+*.apk
+*.idsig
+*.keystore
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

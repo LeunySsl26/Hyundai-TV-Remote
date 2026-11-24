@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hyundai Remote">
+  <title>Hyundai TV Remote - Directo Wi-Fi</title>
+  <style>
+    :root {
+      --bg-page: #0b0f19;
+      --bg-remote: #151d2c;
+      --bg-card: #1c273c;
+      --bg-button: #23314c;
+      --bg-button-hover: #2c3e60;
+      --bg-button-active: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --border-color: #2b3952;
+      --shadow-remote: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 8px;
+      padding-top: env(safe-area-inset-top, 16px);
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    .remote-container {
+      width: 100%;
+      max-width: 380px;
+      background: var(--bg-remote);
+      border: 1px solid var(--border-color);
+      border-radius: 36px;
+      padding: 20px 16px;
+      box-shadow: var(--shadow-remote);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* HEADER & STATUS */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-radius: 20px;
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .device-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .device-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge.disconnected {
+      color: var(--accent-red);
+    }
+    .status-badge.disconnected .status-dot {
+      background: var(--accent-red);
+      box-shadow: 0 0 8px var(--accent-red);
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.6; transform: scale(0.95); }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-settings {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .btn-power {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+      transition: transform 0.1s, filter 0.1s;
+    }
+
+    .btn-power:active {
+      transform: scale(0.92);
+      filter: brightness(0.85);
+    }
+
+    /* CERTIFICATE HELP BANNER */
+    .cert-banner {
+      display: none;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--accent-amber);
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #fde68a;
+    }
+
+    .cert-banner.show {
+      display: block;
+    }
+
+    .cert-btn {
+      display: inline-block;
+      margin-top: 6px;
+      background: var(--accent-amber);
+      color: #000;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    /* TEXT INJECTION / KEYBOARD BAR */
+    .keyboard-bar {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 6px;
+    }
+
+    .keyboard-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 13px;
+      padding: 0 8px;
+      user-select: text;
+    }
+
+    .keyboard-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-kbd {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn-kbd:active {
+      transform: scale(0.94);
+    }
+
+    /* D-PAD */
+    .dpad-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .dpad {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .dpad-btn {
+      position: absolute;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .dpad-btn:active, .dpad-btn.active {
+      background: rgba(59, 130, 246, 0.25);
+      color: var(--accent-blue);
+    }
+
+    .dpad-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .dpad-up { top: 0; left: 50px; width: 100px; height: 60px; padding-bottom: 12px; }
+    .dpad-down { bottom: 0; left: 50px; width: 100px; height: 60px; padding-top: 12px; }
+    .dpad-left { top: 50px; left: 0; width: 60px; height: 100px; padding-right: 12px; }
+    .dpad-right { top: 50px; right: 0; width: 60px; height: 100px; padding-left: 12px; }
+
+    .dpad-center {
+      position: absolute;
+      top: 58px;
+      left: 58px;
+      width: 84px;
+      height: 84px;
+      background: linear-gradient(135deg, #273652, #1b263b);
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+    }
+
+    .dpad-center:active, .dpad-center.active {
+      transform: scale(0.92);
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    /* SYSTEM NAV */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .btn-nav {
+      height: 44px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-nav svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .btn-nav:active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.94);
+    }
+
+    /* VOLUME & CHANNEL ROCKERS */
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .rocker-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .rocker-btn {
+      width: 100%;
+      height: 48px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.1s;
+    }
+
+    .rocker-btn:active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.95);
+    }
+
+    .rocker-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 4px 0;
+      text-align: center;
+    }
+
+    .rocker-mid-btn {
+      width: 100%;
+      height: 36px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.1s;
+    }
+
+    .rocker-mid-btn:active {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+      border-color: var(--accent-red);
+    }
+
+    /* MEDIA CONTROLS */
+    .media-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      border-radius: 18px;
+    }
+
+    .btn-media {
+      height: 38px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-media svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .btn-media:active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.92);
+    }
+
+    /* APPS GRID */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .app-card {
+      height: 48px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-main);
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .app-card:active {
+      transform: scale(0.94);
+      filter: brightness(1.2);
+    }
+
+    .app-card.youtube { border-color: rgba(255, 0, 0, 0.4); }
+    .app-card.netflix { border-color: rgba(229, 9, 20, 0.4); }
+    .app-card.prime { border-color: rgba(0, 168, 225, 0.4); }
+    .app-card.disney { border-color: rgba(17, 60, 207, 0.4); }
+
+    /* INPUTS */
+    .inputs-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-input {
+      height: 36px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-input:active {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    /* NUMPAD */
+    .numpad-drawer {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      border-radius: 18px;
+    }
+
+    .numpad-drawer.open { display: grid; }
+
+    .btn-num {
+      height: 42px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-num:active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.93);
+    }
+
+    /* SETTINGS MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      width: 100%;
+      max-width: 320px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-input {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      user-select: text;
+    }
+
+    .modal-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .modal-btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .modal-btn.primary { background: var(--accent-blue); color: white; }
+    .modal-btn.secondary { background: var(--bg-button); color: var(--text-muted); }
+
+    .footer-hints {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="remote-container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="device-info">
+        <div class="device-title">
+          <span>📺</span>
+          <span>Hyundai Smart TV</span>
+        </div>
+        <div class="device-sub" id="header-sub">Conexión Directa Wi-Fi (webOS)</div>
+        <div class="status-badge" id="status-pill" title="Toca para reconectar">
+          <div class="status-dot"></div>
+          <span id="status-text">Conectando...</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-settings" id="btn-open-settings" title="Configurar IP">⚙</button>
+        <button class="btn-power" id="btn-power" title="Apagar">⏻</button>
+      </div>
+    </div>
+
+    <!-- CERTIFICATE HELP BANNER -->
+    <div class="cert-banner" id="cert-banner">
+      <strong>⚠️ Primer uso en iPhone / Safari:</strong>
+      <p style="margin-top:2px;">Para que el navegador permita la conexión directa y segura a tu TV, debes tocar el botón de abajo y pulsar <em>"Mostrar detalles ➜ Visitar este sitio web"</em> una sola vez:</p>
+      <a href="https://192.168.1.3:3001" target="_blank" class="cert-btn" id="btn-auth-cert">🔐 1. Autorizar TV en Safari</a>
+    </div>
+
+    <!-- VIRTUAL KEYBOARD / TEXT INJECTION -->
+    <div class="keyboard-bar">
+      <input type="text" id="kbd-text" class="keyboard-input" placeholder="Escribir en la TV (YouTube, etc.)..." autocomplete="off" />
+      <button class="btn-kbd" id="btn-send-text">Enviar</button>
+      <button class="btn-kbd" id="btn-send-enter">↵ Enter</button>
+    </div>
+
+    <!-- D-PAD NAVIGATION -->
+    <div class="dpad-container">
+      <div class="dpad">
+        <button class="dpad-btn dpad-up" id="btn-up" title="Arriba">
+          <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-down" id="btn-down" title="Abajo">
+          <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-left" id="btn-left" title="Izquierda">
+          <svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-right" id="btn-right" title="Derecha">
+          <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>
+        </button>
+        <button class="dpad-center" id="btn-ok">OK</button>
+      </div>
+    </div>
+
+    <!-- SYSTEM NAVIGATION -->
+    <div class="nav-grid">
+      <button class="btn-nav" id="btn-back">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <span>ATRÁS</span>
+      </button>
+      <button class="btn-nav" id="btn-home">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>INICIO</span>
+      </button>
+      <button class="btn-nav" id="btn-menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        <span>MENÚ</span>
+      </button>
+      <button class="btn-nav" id="btn-exit">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <span>SALIR</span>
+      </button>
+    </div>
+
+    <!-- VOLUME & CHANNELS -->
+    <div class="controls-row">
+      <!-- Volume Rocker -->
+      <div class="rocker-pill">
+        <button class="rocker-btn" id="btn-vol-up">＋</button>
+        <div class="rocker-label" id="vol-display">VOL 36</div>
+        <button class="rocker-btn" id="btn-vol-down">－</button>
+        <button class="rocker-mid-btn" id="btn-mute">
+          <span id="mute-icon">🔇</span>
+          <span id="mute-text">SILENCIO</span>
+        </button>
+      </div>
+
+      <!-- Channel Rocker -->
+      <div class="rocker-pill">
+        <button class="rocker-btn" id="btn-ch-up">▲</button>
+        <div class="rocker-label">CANAL</div>
+        <button class="rocker-btn" id="btn-ch-down">▼</button>
+        <button class="rocker-mid-btn" id="btn-toggle-num">
+          <span>🔢</span>
+          <span>123</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NUMPAD (COLLAPSIBLE) -->
+    <div class="numpad-drawer" id="numpad-drawer">
+      <button class="btn-num" data-num="1">1</button>
+      <button class="btn-num" data-num="2">2</button>
+      <button class="btn-num" data-num="3">3</button>
+      <button class="btn-num" data-num="4">4</button>
+      <button class="btn-num" data-num="5">5</button>
+      <button class="btn-num" data-num="6">6</button>
+      <button class="btn-num" data-num="7">7</button>
+      <button class="btn-num" data-num="8">8</button>
+      <button class="btn-num" data-num="9">9</button>
+      <button class="btn-num" style="visibility:hidden;"></button>
+      <button class="btn-num" data-num="0">0</button>
+      <button class="btn-num" id="btn-num-close">✕</button>
+    </div>
+
+    <!-- MEDIA CONTROLS -->
+    <div class="media-row">
+      <button class="btn-media" id="btn-rewind" title="Rebobinar">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-play" title="Reproducir">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-pause" title="Pausar">
+        <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-forward" title="Adelantar">
+        <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+      </button>
+    </div>
+
+    <!-- APPS GRID -->
+    <div>
+      <div class="section-title">
+        <span>Aplicaciones Rápidas</span>
+        <span style="font-size:9px; color:var(--accent-blue)">Directo a TV</span>
+      </div>
+      <div class="apps-grid" style="margin-top:6px;">
+        <div class="app-card youtube" data-app="youtube.leanback.v4">
+          <span style="color:#ef4444; font-size:16px;">▶</span>
+          <span>YouTube</span>
+        </div>
+        <div class="app-card netflix" data-app="netflix">
+          <span style="color:#e50914; font-size:14px; font-weight:900;">N</span>
+          <span>Netflix</span>
+        </div>
+        <div class="app-card prime" data-app="amazon">
+          <span style="color:#00a8e1; font-size:14px;">prime</span>
+          <span>Prime</span>
+        </div>
+        <div class="app-card disney" data-app="com.disney.disneyplus-prod">
+          <span style="color:#38bdf8; font-size:14px;">Disney+</span>
+          <span>Disney</span>
+        </div>
+      </div>
+      <div class="apps-grid" style="margin-top:6px;">
+        <div class="app-card" data-app="com.wbd.stream">
+          <span style="color:#818cf8; font-size:13px; font-weight:900;">MAX</span>
+          <span>Max</span>
+        </div>
+        <div class="app-card" data-app="com.crunchyroll.webapp">
+          <span style="color:#f97316; font-size:14px;">●</span>
+          <span>Crunchy</span>
+        </div>
+        <div class="app-card" data-app="com.webos.app.browser">
+          <span style="color:#38bdf8; font-size:14px;">🌐</span>
+          <span>Navegador</span>
+        </div>
+        <div class="app-card" data-app="com.webos.app.livetv">
+          <span style="color:#22c55e; font-size:14px;">📺</span>
+          <span>En Vivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRADAS / HDMI -->
+    <div>
+      <div class="section-title">Entradas de Video</div>
+      <div class="inputs-row" style="margin-top:6px;">
+        <button class="btn-input" data-input="com.webos.app.hdmi1">HDMI 1</button>
+        <button class="btn-input" data-input="com.webos.app.hdmi2">HDMI 2</button>
+        <button class="btn-input" data-input="com.webos.app.hdmi3">HDMI 3</button>
+        <button class="btn-input" data-input="com.webos.app.livetv">TV Antena</button>
+      </div>
+    </div>
+
+    <!-- FOOTER HINTS -->
+    <div class="footer-hints">
+      📲 En iPhone: toca el botón <strong>Compartir</strong> ➜ <strong>"Agregar a pantalla de inicio"</strong> para usarlo como una app independiente.
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-box">
+      <div class="modal-title">Configuración de TV</div>
+      <label style="font-size:12px; color:var(--text-muted)">Dirección IP de la TV:</label>
+      <input type="text" id="input-tv-ip" class="modal-input" value="192.168.1.3" />
+      <div class="modal-btn-row">
+        <button class="modal-btn secondary" id="btn-close-settings">Cancelar</button>
+        <button class="modal-btn primary" id="btn-save-settings">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration & State
+    const CONFIG_KEY_IP = 'hyundai_remote_ip';
+    const CONFIG_KEY_CLIENT_KEY = 'hyundai_remote_client_key';
+    const DEFAULT_IP = '192.168.1.3';
+    const DEFAULT_KEY = 'a57b50c45610a3b701c9f3a195d32696';
+
+    let tvIp = localStorage.getItem(CONFIG_KEY_IP) || DEFAULT_IP;
+    let clientKey = localStorage.getItem(CONFIG_KEY_CLIENT_KEY) || DEFAULT_KEY;
+
+    let mainWs = null;
+    let pointerWs = null;
+    let isConnected = false;
+    let currentVolume = 36;
+    let isMuted = false;
+    let reqId = 1;
+    let reconnectTimer = null;
+    let failedAttempts = 0;
+
+    // UI Elements
+    const statusPill = document.getElementById('status-pill');
+    const statusText = document.getElementById('status-text');
+    const certBanner = document.getElementById('cert-banner');
+    const volDisplay = document.getElementById('vol-display');
+    const muteText = document.getElementById('mute-text');
+    const btnAuthCert = document.getElementById('btn-auth-cert');
+    const settingsModal = document.getElementById('settings-modal');
+    const inputTvIp = document.getElementById('input-tv-ip');
+
+    btnAuthCert.href = "https://" + tvIp + ":3001";
+
+    // Audio & Haptics
+    let audioCtx = null;
+    function haptic() {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(20); } catch(e) {}
+      }
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    // Direct WebOS WebSocket Controller
+    function connectToTv() {
+      if (mainWs && (mainWs.readyState === WebSocket.OPEN || mainWs.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
+
+      updateStatus(false, 'Conectando a ' + tvIp + '...');
+
+      try {
+        mainWs = new WebSocket('wss://' + tvIp + ':3001');
+
+        mainWs.onopen = () => {
+          failedAttempts = 0;
+          certBanner.classList.remove('show');
+          sendRegistration();
+        };
+
+        mainWs.onmessage = (event) => {
+          handleMessage(event.data);
+        };
+
+        mainWs.onclose = () => {
+          handleDisconnect();
+        };
+
+        mainWs.onerror = (err) => {
+          failedAttempts++;
+          // If connection fails, show certificate helper banner for Safari
+          if (failedAttempts >= 1) {
+            certBanner.classList.add('show');
+          }
+        };
+      } catch (e) {
+        handleDisconnect();
+      }
+    }
+
+    function handleDisconnect() {
+      isConnected = false;
+      if (pointerWs) {
+        try { pointerWs.close(); } catch(e) {}
+        pointerWs = null;
+      }
+      updateStatus(false, 'Desconectado (' + tvIp + ')');
+      if (!reconnectTimer) {
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
+          connectToTv();
+        }, 3500);
+      }
+    }
+
+    function sendRegistration() {
+      const reg = {
+        type: 'register',
+        id: 'reg_client_direct',
+        payload: {
+          forcePairing: false,
+          pairingType: 'PROMPT',
+          'client-key': clientKey,
+          manifest: {
+            appVersion: '1.0',
+            manifestVersion: 1,
+            permissions: [
+              'LAUNCH', 'LAUNCH_WEBAPP', 'APP_TO_APP', 'CLOSE',
+              'CONTROL_AUDIO', 'CONTROL_DISPLAY', 'CONTROL_INPUT_TEXT',
+              'CONTROL_MOUSE_AND_KEYBOARD', 'READ_INSTALLED_APPS',
+              'READ_CURRENT_CHANNEL', 'READ_RUNNING_APPS'
+            ]
+          }
+        }
+      };
+      mainWs.send(JSON.stringify(reg));
+    }
+
+    function handleMessage(raw) {
+      try {
+        const data = JSON.parse(raw);
+        const type = data.type;
+        const payload = data.payload || {};
+
+        if (type === 'registered') {
+          isConnected = true;
+          if (payload['client-key']) {
+            clientKey = payload['client-key'];
+            localStorage.setItem(CONFIG_KEY_CLIENT_KEY, clientKey);
+          }
+          updateStatus(true, '● Conectado (' + tvIp + ')');
+          certBanner.classList.remove('show');
+
+          // Request pointer socket and initial volume
+          sendRequest('ssap://com.webos.service.networkinput/getPointerInputSocket');
+          sendRequest('ssap://audio/getVolume');
+
+        } else if (type === 'response') {
+          if (payload.socketPath) {
+            connectPointer(payload.socketPath);
+          }
+          if (payload.volumeStatus) {
+            currentVolume = payload.volumeStatus.volume;
+            isMuted = payload.volumeStatus.muteStatus;
+            updateVolumeUi();
+          } else if (typeof payload.volume !== 'undefined') {
+            currentVolume = payload.volume;
+            isMuted = !!payload.muted;
+            updateVolumeUi();
+          }
+        }
+      } catch (e) {
+        console.error('Error procesando respuesta webOS:', e);
+      }
+    }
+
+    function connectPointer(socketPath) {
+      try {
+        pointerWs = new WebSocket(socketPath);
+        pointerWs.onopen = () => console.log('Pointer Socket Conectado!');
+        pointerWs.onclose = () => { pointerWs = null; };
+      } catch (e) {}
+    }
+
+    function sendRequest(uri, payload) {
+      if (!mainWs || mainWs.readyState !== WebSocket.OPEN) {
+        connectToTv();
+        return;
+      }
+      reqId++;
+      const req = {
+        id: 'req_' + reqId,
+        type: 'request',
+        uri: uri
+      };
+      if (payload) req.payload = payload;
+      mainWs.send(JSON.stringify(req));
+    }
+
+    function sendKey(key) {
+      haptic();
+      if (pointerWs && pointerWs.readyState === WebSocket.OPEN) {
+        pointerWs.send('type:button\nname:' + key + '\n\n');
+      } else {
+        sendRequest('ssap://system/simulateButton', { key: key });
+      }
+    }
+
+    function sendCommand(action) {
+      haptic();
+      const keyMap = {
+        'UP': 'UP', 'DOWN': 'DOWN', 'LEFT': 'LEFT', 'RIGHT': 'RIGHT',
+        'OK': 'ENTER', 'BACK': 'BACK', 'HOME': 'HOME', 'MENU': 'MENU', 'EXIT': 'EXIT'
+      };
+
+      if (keyMap[action]) {
+        sendKey(keyMap[action]);
+      } else if (action === 'POWER') {
+        sendRequest('ssap://system/turnOff');
+      } else if (action === 'VOL_UP') {
+        sendRequest('ssap://audio/volumeUp');
+        sendRequest('ssap://audio/getVolume');
+      } else if (action === 'VOL_DOWN') {
+        sendRequest('ssap://audio/volumeDown');
+        sendRequest('ssap://audio/getVolume');
+      } else if (action === 'MUTE') {
+        isMuted = !isMuted;
+        sendRequest('ssap://audio/setMute', { mute: isMuted });
+        sendRequest('ssap://audio/getVolume');
+      } else if (action === 'CH_UP') {
+        sendRequest('ssap://tv/channelUp');
+      } else if (action === 'CH_DOWN') {
+        sendRequest('ssap://tv/channelDown');
+      } else if (action === 'PLAY') {
+        sendRequest('ssap://media.controls/play');
+      } else if (action === 'PAUSE') {
+        sendRequest('ssap://media.controls/pause');
+      } else if (action === 'REWIND') {
+        sendRequest('ssap://media.controls/rewind');
+      } else if (action === 'FAST_FORWARD') {
+        sendRequest('ssap://media.controls/fastForward');
+      } else if (action.startsWith('NUM_')) {
+        sendKey(action.substring(4));
+      }
+    }
+
+    function launchApp(appId) {
+      haptic();
+      sendRequest('ssap://system.launcher/launch', { id: appId });
+    }
+
+    function switchInput(inputId) {
+      haptic();
+      sendRequest('ssap://tv/switchInput', { inputId: inputId });
+    }
+
+    function insertText(text, enter) {
+      if (!text) return;
+      haptic();
+      sendRequest('ssap://com.webos.service.ime/insertText', { text: text, replace: 0 });
+      if (enter) {
+        setTimeout(() => {
+          sendRequest('ssap://com.webos.service.ime/sendEnterKey');
+        }, 350);
+      }
+    }
+
+    function updateStatus(connected, text) {
+      if (connected) {
+        statusPill.className = 'status-badge';
+        statusText.textContent = text;
+      } else {
+        statusPill.className = 'status-badge disconnected';
+        statusText.textContent = text;
+      }
+    }
+
+    function updateVolumeUi() {
+      if (isMuted) {
+        volDisplay.textContent = 'MUTED';
+        volDisplay.style.color = '#ef4444';
+        muteText.textContent = 'ACTIVAR';
+      } else {
+        volDisplay.textContent = 'VOL ' + currentVolume;
+        volDisplay.style.color = '#94a3b8';
+        muteText.textContent = 'SILENCIO';
+      }
+    }
+
+    // Event Bindings
+    const commandMap = {
+      'btn-power': 'POWER', 'btn-up': 'UP', 'btn-down': 'DOWN',
+      'btn-left': 'LEFT', 'btn-right': 'RIGHT', 'btn-ok': 'OK',
+      'btn-back': 'BACK', 'btn-home': 'HOME', 'btn-menu': 'MENU', 'btn-exit': 'EXIT',
+      'btn-vol-up': 'VOL_UP', 'btn-vol-down': 'VOL_DOWN', 'btn-mute': 'MUTE',
+      'btn-ch-up': 'CH_UP', 'btn-ch-down': 'CH_DOWN',
+      'btn-play': 'PLAY', 'btn-pause': 'PAUSE', 'btn-rewind': 'REWIND', 'btn-forward': 'FAST_FORWARD'
+    };
+
+    for (const [id, cmd] of Object.entries(commandMap)) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => sendCommand(cmd));
+    }
+
+    // Keyboard Text Bar
+    const kbdInput = document.getElementById('kbd-text');
+    document.getElementById('btn-send-text').addEventListener('click', () => {
+      insertText(kbdInput.value, false);
+    });
+    document.getElementById('btn-send-enter').addEventListener('click', () => {
+      insertText(kbdInput.value, true);
+      kbdInput.value = '';
+    });
+    kbdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        insertText(kbdInput.value, true);
+        kbdInput.value = '';
+      }
+    });
+
+    // App Launches
+    document.querySelectorAll('.app-card').forEach(el => {
+      el.addEventListener('click', () => {
+        const appId = el.getAttribute('data-app');
+        if (appId) launchApp(appId);
+      });
+    });
+
+    // Inputs
+    document.querySelectorAll('.btn-input').forEach(el => {
+      el.addEventListener('click', () => {
+        const inputId = el.getAttribute('data-input');
+        if (inputId) switchInput(inputId);
+      });
+    });
+
+    // Numpad Drawer
+    const numpadDrawer = document.getElementById('numpad-drawer');
+    document.getElementById('btn-toggle-num').addEventListener('click', () => {
+      haptic();
+      numpadDrawer.classList.toggle('open');
+    });
+    document.getElementById('btn-num-close').addEventListener('click', () => {
+      haptic();
+      numpadDrawer.classList.remove('open');
+    });
+    document.querySelectorAll('.btn-num[data-num]').forEach(el => {
+      el.addEventListener('click', () => {
+        sendCommand('NUM_' + el.getAttribute('data-num'));
+      });
+    });
+
+    // Settings Modal
+    document.getElementById('btn-open-settings').addEventListener('click', () => {
+      inputTvIp.value = tvIp;
+      settingsModal.classList.add('open');
+    });
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+      settingsModal.classList.remove('open');
+    });
+    document.getElementById('btn-save-settings').addEventListener('click', () => {
+      const newIp = inputTvIp.value.trim();
+      if (newIp) {
+        tvIp = newIp;
+        localStorage.setItem(CONFIG_KEY_IP, tvIp);
+        btnAuthCert.href = "https://" + tvIp + ":3001";
+        if (mainWs) mainWs.close();
+        connectToTv();
+      }
+      settingsModal.classList.remove('open');
+    });
+
+    statusPill.addEventListener('click', connectToTv);
+
+    // Initial connection on load
+    connectToTv();
+  </script>
+</body>
+</html>

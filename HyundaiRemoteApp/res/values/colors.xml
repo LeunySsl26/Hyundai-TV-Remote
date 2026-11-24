@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_main">#111318</color>
+    <color name="card_bg">#1A1D24</color>
+    <color name="btn_normal">#262A34</color>
+    <color name="btn_pressed">#353B49</color>
+    <color name="btn_dpad">#20242D</color>
+    <color name="power_red">#E53935</color>
+    <color name="power_red_pressed">#B71C1C</color>
+    <color name="accent_blue">#007ACC</color>
+    <color name="accent_blue_pressed">#005999</color>
+    <color name="status_green">#4CAF50</color>
+    <color name="status_red">#F44336</color>
+    <color name="text_white">#F0F3F6</color>
+    <color name="text_muted">#8B949E</color>
+    <color name="border_card">#2D333B</color>
+</resources>

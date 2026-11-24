@@ -1,0 +1,632 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_main"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- MODE SELECTOR BAR (IR vs WiFi) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/card_bg"
+            android:orientation="horizontal"
+            android:padding="3dp"
+            android:layout_marginBottom="12dp">
+
+            <Button
+                android:id="@+id/btn_mode_ir"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/btn_accent"
+                android:text="📡 INFRARROJO (IR)"
+                android:textColor="@color/text_white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_mode_wifi"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:text="📶 RED WI-FI"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- TOP BAR: Status & Device Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:orientation="horizontal"
+            android:padding="14dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_device_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hyundai Smart TV"
+                    android:textColor="@color/text_white"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_device_model"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HYLED4026WiM (LG webOS)"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="● Emisor IR Listo (38 kHz)"
+                    android:textColor="@color/status_green"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="3dp" />
+            </LinearLayout>
+
+            <!-- Profile / Settings Button -->
+            <Button
+                android:id="@+id/btn_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/btn_remote"
+                android:text="AJUSTES"
+                android:textColor="@color/text_white"
+                android:textSize="11sp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Power Button -->
+            <Button
+                android:id="@+id/btn_power"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/btn_power"
+                android:text="⏻"
+                android:textColor="@color/text_white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- WEB REMOTE ACCESS CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🌐 Control por Navegador Wi-Fi"
+                    android:textColor="@color/text_white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_web_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="● Servidor Activo"
+                    android:textColor="@color/status_green"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_web_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="http://192.168.1.2:8080"
+                android:textColor="@color/accent_blue"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Abre este enlace desde cualquier PC, laptop o móvil en tu Wi-Fi para usar el control remoto en el navegador."
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/btn_open_browser"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1.2"
+                    android:background="@drawable/btn_accent"
+                    android:text="🌐 ABRIR EN NAVEGADOR"
+                    android:textColor="@color/text_white"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="6dp" />
+
+                <Button
+                    android:id="@+id/btn_copy_url"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="0.8"
+                    android:background="@drawable/btn_remote"
+                    android:text="📋 COPIAR"
+                    android:textColor="@color/text_white"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- QUICK BAR: Keyboard / Search, Numpad, Input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_keyboard"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1.2"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_accent"
+                android:text="⌨ TECLADO / BUSCAR"
+                android:textColor="@color/text_white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_toggle_numpad"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="0.9"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="123 NÚMEROS"
+                android:textColor="@color/text_white"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/btn_input"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="0.9"
+                android:background="@drawable/btn_remote"
+                android:text="INPUT / HDMI"
+                android:textColor="@color/text_white"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- NUMERIC PAD (Toggleable/Collapsible) -->
+        <LinearLayout
+            android:id="@+id/layout_numpad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btn_num_1" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="1" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_2" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="2" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_3" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="3" android:textColor="@color/text_white"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btn_num_4" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="4" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_5" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="5" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_6" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="6" android:textColor="@color/text_white"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/btn_num_7" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="7" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_8" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="8" android:textColor="@color/text_white"/>
+                <Button android:id="@+id/btn_num_9" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="9" android:textColor="@color/text_white"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp"/>
+                <Button android:id="@+id/btn_num_0" android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp" android:layout_margin="2dp" android:background="@drawable/btn_remote" android:text="0" android:textColor="@color/text_white"/>
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="42dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- D-PAD NAVIGATION CLUSTER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <!-- DPAD UP -->
+            <Button
+                android:id="@+id/btn_dpad_up"
+                android:layout_width="80dp"
+                android:layout_height="56dp"
+                android:background="@drawable/btn_remote"
+                android:text="▲"
+                android:textColor="@color/text_white"
+                android:textSize="20sp" />
+
+            <!-- DPAD LEFT - OK - RIGHT -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp">
+
+                <Button
+                    android:id="@+id/btn_dpad_left"
+                    android:layout_width="56dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="◀"
+                    android:textColor="@color/text_white"
+                    android:textSize="20sp" />
+
+                <Button
+                    android:id="@+id/btn_dpad_ok"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/btn_ok_circle"
+                    android:text="OK"
+                    android:textColor="@color/text_white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_dpad_right"
+                    android:layout_width="56dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="▶"
+                    android:textColor="@color/text_white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- DPAD DOWN -->
+            <Button
+                android:id="@+id/btn_dpad_down"
+                android:layout_width="80dp"
+                android:layout_height="56dp"
+                android:background="@drawable/btn_remote"
+                android:text="▼"
+                android:textColor="@color/text_white"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <!-- FUNCTION ROW: Back, Home, Menu, Exit -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="↩ ATRÁS"
+                android:textColor="@color/text_white"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_home"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_accent"
+                android:text="⌂ INICIO"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_menu"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="☰ MENÚ"
+                android:textColor="@color/text_white"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_exit"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_remote"
+                android:text="✕ SALIR"
+                android:textColor="@color/text_white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- VOLUME & CHANNELS CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/card_bg"
+            android:padding="12dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- VOLUME COLUMN -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_vol_up"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="VOL +"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_volume_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="VOLUMEN"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp" />
+
+                <Button
+                    android:id="@+id/btn_vol_down"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="VOL -"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- MUTE BUTTON CENTER -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_mute"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="🔇"
+                    android:textColor="@color/text_white"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MUTE"
+                    android:textColor="@color/text_muted"
+                    android:textSize="10sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <!-- CHANNEL COLUMN -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_ch_up"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="CH ▲"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CANAL"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp" />
+
+                <Button
+                    android:id="@+id/btn_ch_down"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/btn_remote"
+                    android:text="CH ▼"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- MEDIA CONTROLS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_rewind"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="⏪"
+                android:textColor="@color/text_white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_play"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="▶"
+                android:textColor="@color/text_white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_pause"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/btn_remote"
+                android:text="⏸"
+                android:textColor="@color/text_white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_forward"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_remote"
+                android:text="⏩"
+                android:textColor="@color/text_white"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- COLOR BUTTONS (webOS / Teletext) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_color_red"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="#D32F2F"
+                android:text="ROJO"
+                android:textColor="@color/text_white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_color_green"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="#388E3C"
+                android:text="VERDE"
+                android:textColor="@color/text_white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_color_yellow"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="#FBC02D"
+                android:text="AMARILLO"
+                android:textColor="#111111"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_color_blue"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_weight="1"
+                android:background="#1976D2"
+                android:text="AZUL"
+                android:textColor="@color/text_white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+    </LinearLayout>
+</ScrollView>

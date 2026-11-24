@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hyundai TV Remote - Web Wi-Fi</title>
+  <style>
+    :root {
+      --bg-page: #0b0f19;
+      --bg-remote: #151d2c;
+      --bg-card: #1c273c;
+      --bg-button: #23314c;
+      --bg-button-hover: #2c3e60;
+      --bg-button-active: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --border-color: #2b3952;
+      --shadow-remote: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 8px;
+    }
+
+    .remote-container {
+      width: 100%;
+      max-width: 380px;
+      background: var(--bg-remote);
+      border: 1px solid var(--border-color);
+      border-radius: 36px;
+      padding: 20px 16px;
+      box-shadow: var(--shadow-remote);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* HEADER & STATUS */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-radius: 20px;
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .device-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .device-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-top: 2px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge.disconnected {
+      color: var(--accent-red);
+    }
+    .status-badge.disconnected .status-dot {
+      background: var(--accent-red);
+      box-shadow: 0 0 8px var(--accent-red);
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.6; transform: scale(0.95); }
+    }
+
+    .btn-power {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+      transition: transform 0.1s, filter 0.1s;
+    }
+
+    .btn-power:active {
+      transform: scale(0.92);
+      filter: brightness(0.85);
+    }
+
+    /* TEXT INJECTION / KEYBOARD BAR */
+    .keyboard-bar {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 6px;
+    }
+
+    .keyboard-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 13px;
+      padding: 0 8px;
+      user-select: text;
+    }
+
+    .keyboard-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-kbd {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn-kbd:active {
+      transform: scale(0.94);
+    }
+
+    /* D-PAD / JOYSTICK */
+    .dpad-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .dpad {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .dpad-btn {
+      position: absolute;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .dpad-btn:active, .dpad-btn.active {
+      background: rgba(59, 130, 246, 0.25);
+      color: var(--accent-blue);
+    }
+
+    .dpad-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .dpad-up {
+      top: 0;
+      left: 50px;
+      width: 100px;
+      height: 60px;
+      padding-bottom: 12px;
+    }
+
+    .dpad-down {
+      bottom: 0;
+      left: 50px;
+      width: 100px;
+      height: 60px;
+      padding-top: 12px;
+    }
+
+    .dpad-left {
+      top: 50px;
+      left: 0;
+      width: 60px;
+      height: 100px;
+      padding-right: 12px;
+    }
+
+    .dpad-right {
+      top: 50px;
+      right: 0;
+      width: 60px;
+      height: 100px;
+      padding-left: 12px;
+    }
+
+    .dpad-center {
+      position: absolute;
+      top: 58px;
+      left: 58px;
+      width: 84px;
+      height: 84px;
+      background: linear-gradient(135deg, #273652, #1b263b);
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+    }
+
+    .dpad-center:active, .dpad-center.active {
+      transform: scale(0.92);
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    /* SYSTEM NAVIGATION (BACK, HOME, MENU, EXIT) */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .btn-nav {
+      height: 44px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-nav svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .btn-nav:active, .btn-nav.active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.94);
+    }
+
+    /* VOLUME & CHANNEL ROCKERS */
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .rocker-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .rocker-btn {
+      width: 100%;
+      height: 48px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.1s;
+    }
+
+    .rocker-btn:active, .rocker-btn.active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.95);
+    }
+
+    .rocker-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .rocker-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 4px 0;
+      text-align: center;
+    }
+
+    .rocker-mid-btn {
+      width: 100%;
+      height: 36px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.1s;
+    }
+
+    .rocker-mid-btn:active, .rocker-mid-btn.active {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+      border-color: var(--accent-red);
+    }
+
+    /* MEDIA CONTROLS */
+    .media-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      border-radius: 18px;
+    }
+
+    .btn-media {
+      height: 38px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-media svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .btn-media:active, .btn-media.active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.92);
+    }
+
+    /* APPS SHORTCUTS GRID */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .app-card {
+      height: 48px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-main);
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .app-card:active {
+      transform: scale(0.94);
+      filter: brightness(1.2);
+    }
+
+    .app-card.youtube { border-color: rgba(255, 0, 0, 0.4); }
+    .app-card.netflix { border-color: rgba(229, 9, 20, 0.4); }
+    .app-card.prime { border-color: rgba(0, 168, 225, 0.4); }
+    .app-card.disney { border-color: rgba(17, 60, 207, 0.4); }
+
+    .app-badge {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+
+    /* INPUTS / HDMI ROW */
+    .inputs-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-input {
+      height: 36px;
+      background: var(--bg-button);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-input:active, .btn-input.active {
+      background: var(--accent-blue);
+      color: white;
+      border-color: var(--accent-blue);
+    }
+
+    /* NUMPAD COLLAPSIBLE */
+    .numpad-drawer {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      border-radius: 18px;
+    }
+
+    .numpad-drawer.open {
+      display: grid;
+    }
+
+    .btn-num {
+      height: 42px;
+      background: var(--bg-button);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .btn-num:active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(0.93);
+    }
+
+    /* FOOTER & KEYBOARD HINTS */
+    .footer-hints {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .kbd-shortcut {
+      display: inline-block;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: monospace;
+      font-size: 10px;
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="remote-container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="device-info">
+        <div class="device-title">
+          <span>📺</span>
+          <span id="tv-title">Hyundai Smart TV</span>
+        </div>
+        <div class="device-sub" id="tv-model">HYLED4026WiM (LG webOS)</div>
+        <div class="status-badge" id="status-pill">
+          <div class="status-dot"></div>
+          <span id="status-text">Conectado (192.168.1.3)</span>
+        </div>
+      </div>
+      <button class="btn-power" id="btn-power" title="Encender / Apagar">⏻</button>
+    </div>
+
+    <!-- VIRTUAL KEYBOARD / TEXT INJECTION -->
+    <div class="keyboard-bar">
+      <input type="text" id="kbd-text" class="keyboard-input" placeholder="Escribir en la TV (búsqueda)..." autocomplete="off" />
+      <button class="btn-kbd" id="btn-send-text">Enviar</button>
+      <button class="btn-kbd" id="btn-send-enter">↵ Enter</button>
+    </div>
+
+    <!-- D-PAD NAVIGATION -->
+    <div class="dpad-container">
+      <div class="dpad">
+        <button class="dpad-btn dpad-up" id="btn-up" title="Arriba">
+          <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h6v8h4v-8h6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-down" id="btn-down" title="Abajo">
+          <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-6v-8h-4v8h-6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-left" id="btn-left" title="Izquierda">
+          <svg viewBox="0 0 24 24"><path d="M4 12l8-8v6h8v4h-8v6z"/></svg>
+        </button>
+        <button class="dpad-btn dpad-right" id="btn-right" title="Derecha">
+          <svg viewBox="0 0 24 24"><path d="M20 12l-8 8v-6h-8v-4h8v-6z"/></svg>
+        </button>
+        <button class="dpad-center" id="btn-ok">OK</button>
+      </div>
+    </div>
+
+    <!-- SYSTEM NAVIGATION -->
+    <div class="nav-grid">
+      <button class="btn-nav" id="btn-back">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <span>ATRÁS</span>
+      </button>
+      <button class="btn-nav" id="btn-home">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>INICIO</span>
+      </button>
+      <button class="btn-nav" id="btn-menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        <span>MENÚ</span>
+      </button>
+      <button class="btn-nav" id="btn-exit">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <span>SALIR</span>
+      </button>
+    </div>
+
+    <!-- VOLUME & CHANNELS -->
+    <div class="controls-row">
+      <!-- Volume Rocker -->
+      <div class="rocker-pill">
+        <button class="rocker-btn" id="btn-vol-up">＋</button>
+        <div class="rocker-label" id="vol-display">VOL 36</div>
+        <button class="rocker-btn" id="btn-vol-down">－</button>
+        <button class="rocker-mid-btn" id="btn-mute">
+          <span id="mute-icon">🔇</span>
+          <span id="mute-text">SILENCIO</span>
+        </button>
+      </div>
+
+      <!-- Channel Rocker -->
+      <div class="rocker-pill">
+        <button class="rocker-btn" id="btn-ch-up">▲</button>
+        <div class="rocker-label">CANAL</div>
+        <button class="rocker-btn" id="btn-ch-down">▼</button>
+        <button class="rocker-mid-btn" id="btn-toggle-num">
+          <span>🔢</span>
+          <span>123</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NUMPAD (COLLAPSIBLE) -->
+    <div class="numpad-drawer" id="numpad-drawer">
+      <button class="btn-num" data-num="1">1</button>
+      <button class="btn-num" data-num="2">2</button>
+      <button class="btn-num" data-num="3">3</button>
+      <button class="btn-num" data-num="4">4</button>
+      <button class="btn-num" data-num="5">5</button>
+      <button class="btn-num" data-num="6">6</button>
+      <button class="btn-num" data-num="7">7</button>
+      <button class="btn-num" data-num="8">8</button>
+      <button class="btn-num" data-num="9">9</button>
+      <button class="btn-num" style="visibility:hidden;"></button>
+      <button class="btn-num" data-num="0">0</button>
+      <button class="btn-num" id="btn-num-close">✕</button>
+    </div>
+
+    <!-- MEDIA CONTROLS -->
+    <div class="media-row">
+      <button class="btn-media" id="btn-rewind" title="Rebobinar">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-play" title="Reproducir">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-pause" title="Pausar">
+        <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="btn-media" id="btn-forward" title="Adelantar">
+        <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+      </button>
+    </div>
+
+    <!-- APPS GRID -->
+    <div>
+      <div class="section-title">
+        <span>Aplicaciones Rápidas</span>
+        <span style="font-size:9px; color:var(--accent-blue)">webOS Hub</span>
+      </div>
+      <div class="apps-grid" style="margin-top:6px;">
+        <div class="app-card youtube" data-app="youtube.leanback.v4">
+          <span style="color:#ef4444; font-size:16px;">▶</span>
+          <span>YouTube</span>
+        </div>
+        <div class="app-card netflix" data-app="netflix">
+          <span style="color:#e50914; font-size:14px; font-weight:900;">N</span>
+          <span>Netflix</span>
+        </div>
+        <div class="app-card prime" data-app="amazon">
+          <span style="color:#00a8e1; font-size:14px;">prime</span>
+          <span>Prime</span>
+        </div>
+        <div class="app-card disney" data-app="com.disney.disneyplus-prod">
+          <span style="color:#38bdf8; font-size:14px;">Disney+</span>
+          <span>Disney</span>
+        </div>
+      </div>
+      <div class="apps-grid" style="margin-top:6px;">
+        <div class="app-card" data-app="com.wbd.stream">
+          <span style="color:#818cf8; font-size:13px; font-weight:900;">MAX</span>
+          <span>Max</span>
+        </div>
+        <div class="app-card" data-app="com.crunchyroll.webapp">
+          <span style="color:#f97316; font-size:14px;">●</span>
+          <span>Crunchy</span>
+        </div>
+        <div class="app-card" data-app="com.webos.app.browser">
+          <span style="color:#38bdf8; font-size:14px;">🌐</span>
+          <span>Navegador</span>
+        </div>
+        <div class="app-card" data-app="com.webos.app.livetv">
+          <span style="color:#22c55e; font-size:14px;">📺</span>
+          <span>En Vivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRADAS / HDMI -->
+    <div>
+      <div class="section-title">Entradas de Video</div>
+      <div class="inputs-row" style="margin-top:6px;">
+        <button class="btn-input" data-input="com.webos.app.hdmi1">HDMI 1</button>
+        <button class="btn-input" data-input="com.webos.app.hdmi2">HDMI 2</button>
+        <button class="btn-input" data-input="com.webos.app.hdmi3">HDMI 3</button>
+        <button class="btn-input" data-input="com.webos.app.livetv">TV Antena</button>
+      </div>
+    </div>
+
+    <!-- FOOTER HINTS -->
+    <div class="footer-hints">
+      ⌨ Puedes controlar la TV desde tu PC con <span class="kbd-shortcut">Flechas</span>, <span class="kbd-shortcut">Enter</span>, <span class="kbd-shortcut">Esc</span>, <span class="kbd-shortcut">H</span>, <span class="kbd-shortcut">+</span> / <span class="kbd-shortcut">-</span> y <span class="kbd-shortcut">Espacio</span>.
+    </div>
+  </div>
+
+  <script>
+    // Audio synthesis for tactile clicks
+    let audioCtx = null;
+    function playClick() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function haptic() {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(20); } catch(e) {}
+      }
+      playClick();
+    }
+
+    // API Callers
+    async function sendCommand(action) {
+      haptic();
+      try {
+        const res = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: action })
+        });
+        const data = await res.json();
+        updateStatusFromData(data);
+      } catch (err) {
+        console.error('Error sending command:', err);
+      }
+    }
+
+    async function sendApp(appId) {
+      haptic();
+      try {
+        const res = await fetch('/api/launch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId: appId })
+        });
+        const data = await res.json();
+        updateStatusFromData(data);
+      } catch (err) {
+        console.error('Error launching app:', err);
+      }
+    }
+
+    async function sendInput(inputId) {
+      haptic();
+      try {
+        const res = await fetch('/api/input', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inputId: inputId })
+        });
+        const data = await res.json();
+        updateStatusFromData(data);
+      } catch (err) {
+        console.error('Error setting input:', err);
+      }
+    }
+
+    async function sendText(text, enter) {
+      if (!text) return;
+      haptic();
+      try {
+        const res = await fetch('/api/text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, enter: !!enter })
+        });
+        const data = await res.json();
+        updateStatusFromData(data);
+      } catch (err) {
+        console.error('Error inserting text:', err);
+      }
+    }
+
+    function updateStatusFromData(data) {
+      if (!data) return;
+      const statusPill = document.getElementById('status-pill');
+      const statusText = document.getElementById('status-text');
+      const volDisplay = document.getElementById('vol-display');
+      const muteText = document.getElementById('mute-text');
+
+      if (data.connected) {
+        statusPill.className = 'status-badge';
+        statusText.textContent = 'Conectado (' + (data.tvIp || '192.168.1.3') + ')';
+      } else {
+        statusPill.className = 'status-badge disconnected';
+        statusText.textContent = '○ Desconectado';
+      }
+
+      if (typeof data.volume !== 'undefined') {
+        if (data.muted) {
+          volDisplay.textContent = 'MUTED';
+          volDisplay.style.color = '#ef4444';
+          muteText.textContent = 'DESILENCIAR';
+        } else {
+          volDisplay.textContent = 'VOL ' + data.volume;
+          volDisplay.style.color = '#94a3b8';
+          muteText.textContent = 'SILENCIO';
+        }
+      }
+    }
+
+    async function refreshStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        updateStatusFromData(data);
+      } catch (e) {}
+    }
+
+    // Bind event listeners
+    const commandMap = {
+      'btn-power': 'POWER',
+      'btn-up': 'UP',
+      'btn-down': 'DOWN',
+      'btn-left': 'LEFT',
+      'btn-right': 'RIGHT',
+      'btn-ok': 'OK',
+      'btn-back': 'BACK',
+      'btn-home': 'HOME',
+      'btn-menu': 'MENU',
+      'btn-exit': 'EXIT',
+      'btn-vol-up': 'VOL_UP',
+      'btn-vol-down': 'VOL_DOWN',
+      'btn-mute': 'MUTE',
+      'btn-ch-up': 'CH_UP',
+      'btn-ch-down': 'CH_DOWN',
+      'btn-play': 'PLAY',
+      'btn-pause': 'PAUSE',
+      'btn-rewind': 'REWIND',
+      'btn-forward': 'FAST_FORWARD'
+    };
+
+    for (const [id, cmd] of Object.entries(commandMap)) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', () => sendCommand(cmd));
+      }
+    }
+
+    // Keyboard bar listeners
+    const kbdInput = document.getElementById('kbd-text');
+    document.getElementById('btn-send-text').addEventListener('click', () => {
+      sendText(kbdInput.value, false);
+    });
+    document.getElementById('btn-send-enter').addEventListener('click', () => {
+      sendText(kbdInput.value, true);
+      kbdInput.value = '';
+    });
+    kbdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendText(kbdInput.value, true);
+        kbdInput.value = '';
+      }
+    });
+
+    // App launches
+    document.querySelectorAll('.app-card').forEach(el => {
+      el.addEventListener('click', () => {
+        const appId = el.getAttribute('data-app');
+        if (appId) sendApp(appId);
+      });
+    });
+
+    // Inputs
+    document.querySelectorAll('.btn-input').forEach(el => {
+      el.addEventListener('click', () => {
+        const inputId = el.getAttribute('data-input');
+        if (inputId) sendInput(inputId);
+      });
+    });
+
+    // Numpad drawer toggle
+    const numpadDrawer = document.getElementById('numpad-drawer');
+    document.getElementById('btn-toggle-num').addEventListener('click', () => {
+      haptic();
+      numpadDrawer.classList.toggle('open');
+    });
+    document.getElementById('btn-num-close').addEventListener('click', () => {
+      haptic();
+      numpadDrawer.classList.remove('open');
+    });
+
+    // Numpad buttons
+    document.querySelectorAll('.btn-num[data-num]').forEach(el => {
+      el.addEventListener('click', () => {
+        const num = el.getAttribute('data-num');
+        sendCommand('NUM_' + num);
+      });
+    });
+
+    // Physical Keyboard shortcuts for Desktop Browsers
+    window.addEventListener('keydown', (e) => {
+      // Don't intercept if user is typing in the search box
+      if (document.activeElement === kbdInput) return;
+
+      switch(e.key) {
+        case 'ArrowUp': e.preventDefault(); sendCommand('UP'); break;
+        case 'ArrowDown': e.preventDefault(); sendCommand('DOWN'); break;
+        case 'ArrowLeft': e.preventDefault(); sendCommand('LEFT'); break;
+        case 'ArrowRight': e.preventDefault(); sendCommand('RIGHT'); break;
+        case 'Enter': e.preventDefault(); sendCommand('OK'); break;
+        case 'Escape':
+        case 'Backspace': e.preventDefault(); sendCommand('BACK'); break;
+        case 'h':
+        case 'H': e.preventDefault(); sendCommand('HOME'); break;
+        case 'm':
+        case 'M': e.preventDefault(); sendCommand('MUTE'); break;
+        case '+':
+        case '=': e.preventDefault(); sendCommand('VOL_UP'); break;
+        case '-':
+        case '_': e.preventDefault(); sendCommand('VOL_DOWN'); break;
+        case ' ': e.preventDefault(); sendCommand('PLAY'); break;
+        default:
+          if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            sendCommand('NUM_' + e.key);
+          }
+          break;
+      }
+    });
+
+    // Auto-refresh status every 4 seconds
+    setInterval(refreshStatus, 4000);
+    refreshStatus();
+  </script>
+</body>
+</html>

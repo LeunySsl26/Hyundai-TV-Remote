@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hyundai Remote</string>
+    <string name="connecting">Conectando...</string>
+    <string name="connected">Conectado a Hyundai TV</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="scan_network">Escanear TV</string>
+    <string name="vol_up">VOL +</string>
+    <string name="vol_down">VOL -</string>
+    <string name="mute">MUTE</string>
+    <string name="ch_up">CH ▲</string>
+    <string name="ch_down">CH ▼</string>
+    <string name="ok">OK</string>
+    <string name="home">HOME</string>
+    <string name="back">ATRÁS</string>
+    <string name="menu">MENÚ</string>
+    <string name="exit">SALIR</string>
+    <string name="power">POWER</string>
+    <string name="netflix">NETFLIX</string>
+    <string name="youtube">YOUTUBE</string>
+    <string name="prime">PRIME</string>
+    <string name="hdmi">HDMI</string>
+</resources>
